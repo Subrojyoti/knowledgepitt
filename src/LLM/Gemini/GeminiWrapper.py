@@ -26,4 +26,20 @@ class GeminiWrapper(Gemini, metaclass=Singleton):
         except Exception as e:
             self.__logger.error(f"Failed to generate embeddings: {e}")
             raise
+
+    async def llm_model_func(self, prompt, system_prompt=None, history=[], **kwargs) -> str:
+        model = kwargs.get("model", "gemini-2.5-flash-lite")
+        if kwargs.get("stream", False):
+            return self.get_response_stream(
+                model=model,
+                user_message=prompt,
+                system_prompt=system_prompt
+            )
+        else:
+            response = await self.get_response(
+                model=model,
+                user_message=prompt,
+                system_prompt=system_prompt
+            )
+            return response.text
         

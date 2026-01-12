@@ -39,6 +39,6 @@ class Gemini(metaclass=Singleton):
                 system_instruction=system_prompt
             )
         ):
-            return chunk
+            yield chunk.text
 
         

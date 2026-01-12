@@ -23,7 +23,8 @@ class LightRagService(metaclass=Singleton):
                 working_dir=options['working_dir'],
                 workspace=options['workspace'],
                 log_file_path=options['log_file_path'],
-                embedding_func_conf=embedding_func_conf
+                embedding_func_conf=embedding_func_conf,
+                llm_model_func=self.__gemini_client.llm_model_func
             )
 
     async def initialize(self):
@@ -48,7 +49,12 @@ class LightRagService(metaclass=Singleton):
         """Query the LightRAG system."""
         self.__logger.info(f"Querying LightRAG: {query}")
         try:
-            return await self.__rag.aquery(query, param=QueryParam(mode='hybrid', top_k=5, stream=True))
+            result = await self.__rag.aquery(query, param=QueryParam(mode='hybrid', top_k=5, stream=True))
+            if isinstance(result, str):
+                yield result
+            else:
+                async for chunk in result:
+                    yield chunk
         except Exception as e:
             self.__logger.error(f"Failed to query LightRAG: {e}")
             raise
